@@ -1,0 +1,757 @@
+<!--
+
+/**************************************************
+* ShipCalc 2.8.01 - calc html
+* Original by Madox, Modifications by ZmaniacZ
+* More modifications by Mardak!
+* Back to ZmaniacZ again
+* If you want to use the code, please ask.
+* zz@redial.net
+* 2006-07-02
+**************************************************/
+
+-->
+
+<script type="text/JavaScript" src="http://www.redial.net/calc2.8/tdzkcalc2.8.js"></script>
+<script type="text/JavaScript" src="http://www.redial.net/calc2.8/tdzksave2.8.js"></script>
+<script type="text/JavaScript" src="http://www.redial.net/calc2.8/tdzkdata2.8.js"></script>
+<script type="text/JavaScript" src="http://www.redial.net/calc2.8/tdzkinit2.8.js"></script>
+
+<form id="form" action="#">
+  <table class="tcenter">
+    <tr>
+      <td><table border="0" cellspacing="0" cellpadding="0" class="tcenter">
+          <tr>
+            <td align="right">Current Ship Name:</td>
+            <td align="left"><input id="shipname" onchange="if(this.value.length==0)document.getElementById('defaultName').value=1;else document.getElementById('defaultName').value=0" value="Tiny Little Pod" size="24" />
+            </td>
+          </tr>
+          <tr>
+            <td align="right">Ship:</td>
+            <td align="left"><select id="ship" style="width:100px" onchange="selectShip()">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td align="right">Race:</td>
+            <td align="left"><select id="race" style="width: 100px" onchange="selectRace()">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <input type="hidden" id="defaultName" value="1" />
+        <p></p>
+        <table border="0" cellpadding="0" cellspacing="0" class="tcenter">
+          <tr>
+            <td class="center"><select id="saveshipmenu" style="width: 190px">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td id="savemenubuttons" class="center"><input value="Save" type="button" onclick="saveship(document.getElementById('saveshipmenu').value)" />
+              <input value="Load" type="button" onclick="loadship(document.getElementById('saveshipmenu').value)" />
+              <input value="Kill" type="button" onclick="delship(document.getElementById('saveshipmenu').value)" />
+            </td>
+          </tr>
+          <tr>
+            <td class="center"><input id="clearSavedButton" onclick="clearsaved()" type="button" value="Purge All Saved Ships" />
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table class="tcenter">
+          <tr>
+            <td colspan="2"><table cellspacing="0" cellpadding="0">
+                <tr>
+                  <td>Ship String:</td>
+                  <td style="text-align: right"><input id="shipstring" size="50" style="width: 325px" value="Ship String" />
+                    <br />
+                    <span id="shopping"></span> </td>
+                </tr>
+              </table></td>
+          </tr>
+          <tr>
+            <td align="right"><input id="implodeShipstringButton" class="ssButton" onclick="e.shipstring.value=implodeshipstring(1)" type="button" value="Create Ship String" />
+            </td>
+            <td><input id="explodeShipstringButton" class="ssButton" onclick="explodeshipstring(e.shipstring.value, 1)" type="button" value="Process Ship String" />
+            </td>
+          </tr>
+          <tr>
+            <td align="right"><input id="freezeUpgradesButton" class="ssButton" onclick="freezeUpgrades()" type="button" value="Start With This Setup" />
+            </td>
+            <td><input id="resetButton" class="ssButton" onclick="selectShip(1)" type="button" value="Reset All To Zero" />
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table border="0" cellpadding="0" cellspacing="0" class="tcenter">
+          <tr>
+            <td class="center">Equipment 1:
+              <select class="available" id="eq1" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center">Equipment 2:
+              <select class="available" id="eq2" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center">Equipment 3:
+              <select class="available" id="eq3" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center">Equipment 4:
+              <select class="available" id="eq4" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center">Equipment 5:
+              <select class="available" id="eq5" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center">Equipment 6:
+              <select class="available" id="eq6" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center">Equipment 7:
+              <select class="available" id="eq7" onchange="selectEq(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="center" id="tdracialequip">Racial Equipment:
+              <input id="racialequip" size="40" value="None" />
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table class="tcenter">
+          <tr>
+            <td><table border="0" cellpadding="2" cellspacing="0" class="tcenter">
+                <tr>
+                  <td>Level:</td>
+                  <td><input id="level" readonly="readonly" size="5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Size:</td>
+                  <td><input id="size" readonly="readonly" size="5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Chassis:</td>
+                  <td><input id="chassis" readonly="readonly" size="5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Armor Repair:</td>
+                  <td><input id="armourrch" readonly="readonly" size="5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>EMP Repair:</td>
+                  <td><input id="emprch" readonly="readonly" size="5" value="0" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Gather:</td>
+                  <td><input id="gather" readonly="readonly" size="5" value="0" />
+                  </td>
+                </tr>
+              </table></td>
+            <td><table cellspacing="0" cellpadding="2" border="0" class="tcenter">
+                <tr>
+                  <td colspan="4">Drone Configuration</td>
+                </tr>
+                <tr>
+                  <td>Shield:</td>
+                  <td><input id="shielddrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                  <td>Scout :</td>
+                  <td><input id="scoutdrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Combat :</td>
+                  <td><input id="combatdrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                  <td>Resource :</td>
+                  <td><input id="resourcedrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Emp:</td>
+                  <td><input id="empdrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                  <td>Repair:</td>
+                  <td><input id="repairdrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td></td>
+                  <td></td>
+                  <td>Minelayers:</td>
+                  <td><input id="minedrones" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+              </table></td>
+          </tr>
+        </table>
+        <p></p>
+        <table class="tcenter">
+          <tr>
+            <td>Cost:</td>
+            <td><input id="cost" readonly="readonly" size="20" value="$ 0" />
+            </td>
+          </tr>
+        </table>
+        <table border="0" cellspacing="0" cellpadding="1" class="tcenter">
+          <tr>
+            <td class="white" colspan="2">(1) Base Cost = $500,000</td>
+            <td></td>
+            <td class="white" colspan="2">(4) Base Cost = $100,000</td>
+          </tr>
+          <tr>
+            <td>Targeting Computer:</td>
+            <td class="center"><input id="targeting" readonly="readonly" size="5" value="+0" />
+              <input id="upgr13up" onclick="addUpgrade(13,1,0)" type="button" value=" + " />
+              <input id="upgr13down" onclick="addUpgrade(13,-1,0)" type="button" value=" - " />
+              <input id="upgr13zero" onclick="addUpgrade(13,0,0)" type="button" value=" Zero " />
+              <input id="upgr13" size="5" value="0" onchange="addUpgrade(13,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td>Shield Battery:</td>
+            <td class="center"><input id="shield" readonly="readonly" size="5" value="0" />
+              <input id="upgr0up" onclick="addUpgrade(0,1,0)" type="button" value=" + " />
+              <input id="upgr0down" onclick="addUpgrade(0,-1,0)" type="button" value=" - " />
+              <input id="upgr0zero" onclick="addUpgrade(0,0,0)" type="button" value=" Zero " />
+              <input id="upgr0" size="5" value="0" onchange="addUpgrade(0,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Damage Amplifiers:</td>
+            <td class="center"><input id="armorpierce" readonly="readonly" size="5" value="0" />
+              <input id="upgr14up" onclick="addUpgrade(14,1,0)" type="button" value=" + " />
+              <input id="upgr14down" onclick="addUpgrade(14,-1,0)" type="button" value=" - " />
+              <input id="upgr14zero" onclick="addUpgrade(14,0,0)" type="button" value=" Zero " />
+              <input id="upgr14" size="5" value="0" onchange="addUpgrade(14,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td>Shield Generator:</td>
+            <td class="center"><input id="shieldrch" readonly="readonly" size="5" value="0" />
+              <input id="upgr1up" onclick="addUpgrade(1,1,0)" type="button" value=" + " />
+              <input id="upgr1down" onclick="addUpgrade(1,-1,0)" type="button" value=" - " />
+              <input id="upgr1zero" onclick="addUpgrade(1,0,0)" type="button" value=" Zero " />
+              <input id="upgr1" size="5" value="0" onchange="addUpgrade(1,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td class="white" colspan="3">(2) Base Cost = $1,000,000</td>
+            <td>Armour Upgrade:</td>
+            <td class="center"><input id="armour" readonly="readonly" size="5" value="0" />
+              <input id="upgr2up" onclick="addUpgrade(2,1,0)" type="button" value=" + " />
+              <input id="upgr2down" onclick="addUpgrade(2,-1,0)" type="button" value=" - " />
+              <input id="upgr2zero" onclick="addUpgrade(2,0,0)" type="button" value=" Zero " />
+              <input id="upgr2" size="5" value="0" onchange="addUpgrade(2,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Main Engine:</td>
+            <td class="center"><input id="speed" readonly="readonly" size="5" value="0" />
+              <input id="upgr9up" onclick="addUpgrade(9,1,0)" type="button" value=" + " />
+              <input id="upgr9down" onclick="addUpgrade(9,-1,0)" type="button" value=" - " />
+              <input id="upgr9zero" onclick="addUpgrade(9,0,0)" type="button" value=" Zero " />
+              <input id="upgr9" size="5" value="0" onchange="addUpgrade(9,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td>Armour Integrity:</td>
+            <td class="center"><input id="armourint" readonly="readonly" size="5" value="0" />
+              <input id="upgr3up" onclick="addUpgrade(3,1,0)" type="button" value=" + " />
+              <input id="upgr3down" onclick="addUpgrade(3,-1,0)" type="button" value=" - " />
+              <input id="upgr3zero" onclick="addUpgrade(3,0,0)" type="button" value=" Zero " />
+              <input id="upgr3" size="5" value="0" onchange="addUpgrade(3,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Primary Hardpoint:</td>
+            <td class="center"><input id="php" readonly="readonly" size="5" value="0" />
+              <input id="upgr11up" onclick="addUpgrade(11,1,0)" type="button" value=" + " />
+              <input id="upgr11down" onclick="addUpgrade(11,-1,0)" type="button" value=" - " />
+              <input id="upgr11zero" onclick="addUpgrade(11,0,0)" type="button" value=" Zero " />
+              <input id="upgr11" size="5" value="0" onchange="addUpgrade(11,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td>Power Battery:</td>
+            <td class="center"><input id="power" readonly="readonly" size="5" value="0" />
+              <input id="upgr4up" onclick="addUpgrade(4,1,0)" type="button" value=" + " />
+              <input id="upgr4down" onclick="addUpgrade(4,-1,0)" type="button" value=" - " />
+              <input id="upgr4zero" onclick="addUpgrade(4,0,0)" type="button" value=" Zero " />
+              <input id="upgr4" size="5" value="0" onchange="addUpgrade(4,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Secondary Hardpoint:</td>
+            <td class="center"><input id="shp" readonly="readonly" size="5" value="0" />
+              <input id="upgr12up" onclick="addUpgrade(12,1,0)" type="button" value=" + " />
+              <input id="upgr12down" onclick="addUpgrade(12,-1,0)" type="button" value=" - " />
+              <input id="upgr12zero" onclick="addUpgrade(12,0,0)" type="button" value=" Zero " />
+              <input id="upgr12" size="5" value="0" onchange="addUpgrade(12,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td>Power Generator:</td>
+            <td class="center"><input id="powerrch" readonly="readonly" size="5" value="0" />
+              <input id="upgr5up" onclick="addUpgrade(5,1,0)" type="button" value=" + " />
+              <input id="upgr5down" onclick="addUpgrade(5,-1,0)" type="button" value=" - " />
+              <input id="upgr5zero" onclick="addUpgrade(5,0,0)" type="button" value=" Zero " />
+              <input id="upgr5" size="5" value="0" onchange="addUpgrade(5,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Cargo Hold:</td>
+            <td class="center"><input id="cargo" readonly="readonly" size="5" value="0" />
+              <input id="upgr10up" onclick="addUpgrade(10,1,0)" type="button" value=" + " />
+              <input id="upgr10down" onclick="addUpgrade(10,-1,0)" type="button" value=" - " />
+              <input id="upgr10zero" onclick="addUpgrade(10,0,0)" type="button" value=" Zero " />
+              <input id="upgr10" size="5" value="0" onchange="addUpgrade(10,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td>Maneuverability:</td>
+            <td class="center"><input id="man" readonly="readonly" size="5" value="0" />
+              <input id="upgr6up" onclick="addUpgrade(6,1,0)" type="button" value=" + " />
+              <input id="upgr6down" onclick="addUpgrade(6,-1,0)" type="button" value=" - " />
+              <input id="upgr6zero" onclick="addUpgrade(6,0,0)" type="button" value=" Zero " />
+              <input id="upgr6" size="5" value="0" onchange="addUpgrade(6,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td class="white" colspan="3">(3) Base Cost = $250,000</td>
+            <td>Stealth Coating:</td>
+            <td class="center"><input id="cloakstealth" readonly="readonly" size="5" value="0"	/>
+              <input id="upgr7up" onclick="addUpgrade(7,1,0)" type="button" value=" + " />
+              <input id="upgr7down" onclick="addUpgrade(7,-1,0)" type="button" value=" - " />
+              <input id="upgr7zero" onclick="addUpgrade(7,0,0)" type="button" value=" Zero " />
+              <input id="upgr7" size="5" value="0" onchange="addUpgrade(7,parseInt(this.value),1)" />
+            </td>
+          </tr>
+          <tr>
+            <td>Drone Hangars:</td>
+            <td class="center"><input id="drones" readonly="readonly" size="5" value="0" />
+              <input id="upgr8up" onclick="addUpgrade(8,1,0)" type="button" value=" + " />
+              <input id="upgr8down" onclick="addUpgrade(8,-1,0)" type="button" value=" - " />
+              <input id="upgr8zero" onclick="addUpgrade(8,0,0)" type="button" value=" Zero " />
+              <input id="upgr8" size="5" value="0" onchange="addUpgrade(8,parseInt(this.value),1)" />
+            </td>
+            <td></td>
+            <td id="uncloaked">Uncloaked</td>
+            <td></td>
+          </tr>
+        </table>
+        <p></p>
+        <table border="0" cellspacing="1" class="tcenter">
+          <tr>
+            <td class="white">Primaries (20)</td>
+            <td></td>
+            <td class="white">Secondaries (10)</td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons1" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+            <td><select class="available" id="weapons11" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons11copy" onclick="weapons11.value=weapons10.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons21" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons2" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons2copy" onclick="weapons2.value=weapons1.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons12" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons12copy" onclick="weapons12.value=weapons11.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons22" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons22copy" onclick="weapons22.value=weapons21.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons3" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons3copy" onclick="weapons3.value=weapons2.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons13" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons13copy" onclick="weapons13.value=weapons12.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons23" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons23copy" onclick="weapons23.value=weapons22.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons4" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons4copy" onclick="weapons4.value=weapons3.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons14" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons14copy" onclick="weapons14.value=weapons13.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons24" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons24copy" onclick="weapons24.value=weapons23.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons5" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons5copy" onclick="weapons5.value=weapons4.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons15" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons15copy" onclick="weapons15.value=weapons14.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons25" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons25copy" onclick="weapons25.value=weapons24.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons6" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons6copy" onclick="weapons6.value=weapons5.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons16" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons16copy" onclick="weapons16.value=weapons15.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons26" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons26copy" onclick="weapons26.value=weapons25.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons7" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons7copy" onclick="weapons7.value=weapons6.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons17" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons17copy" onclick="weapons17.value=weapons16.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons27" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons27copy" onclick="weapons27.value=weapons26.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons8" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons8copy" onclick="weapons8.value=weapons7.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons18" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons18copy" onclick="weapons18.value=weapons17.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons28" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons28copy" onclick="weapons28.value=weapons27.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons9" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons9copy" onclick="weapons9.value=weapons8.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons19" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons19copy" onclick="weapons19.value=weapons18.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons29" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons29copy" onclick="weapons29.value=weapons28.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+          <tr>
+            <td><select class="available" id="weapons10" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons10copy" onclick="weapons10.value=weapons9.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons20" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons20copy" onclick="weapons20.value=weapons19.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+            <td><select class="available" id="weapons30" onchange="selectWeapons(1)">
+                <option value="0"></option>
+              </select>
+              <input id="weapons30copy" onclick="weapons30.value=weapons29.value;selectWeapons(1);selectWeapons(1)" type="button" value="^" />
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table class="tcenter">
+          <tr>
+            <td class="white">Auras</td>
+          </tr>
+          <tr>
+            <td><div style="text-align:right;">Accuracy: </div></td>
+            <td><input id="accaura" name="accaura" readonly="readonly" size="4" value="0" />
+              <input id="accauraup" onclick="addAura(0, 1, 1)" type="button" value=" + " />
+              <input id="accauradown" onclick="addAura(0, -1, 1)" type="button" value=" - " />
+            </td>
+            <td><div style="text-align:right;">Power: </div></td>
+            <td><input id="poweraura" name="poweraura" readonly="readonly" size="4" value="0" />
+              <input id="powerauraup" onclick="addAura(3, 1, 1)" type="button" value=" + " />
+              <input id="powerauradown" onclick="addAura(3, -1, 1)" type="button" value=" - " />
+            </td>
+          </tr>
+          <tr>
+            <td><div style="text-align:right;">Damage: </div></td>
+            <td><input id="dmgaura" name="dmgaura" readonly="readonly" size="4" value="0" />
+              <input id="dmgauraup" onclick="addAura(1, 1, 1)" type="button" value=" + " />
+              <input id="dmgauradown" onclick="addAura(1, -1, 1)" type="button" value=" - " />
+            </td>
+            <td><div style="text-align:right;">Repair: </div></td>
+            <td><input id="repaura" name="repaura" readonly="readonly" size="4" value="0" />
+              <input id="repauraup" onclick="addAura(4, 1, 1)" type="button" value=" + " />
+              <input id="repauradown" onclick="addAura(4, -1, 1)" type="button" value=" - " />
+            </td>
+          </tr>
+          <tr>
+            <td><div style="text-align:right;">Drone: </div></td>
+            <td><input id="droneaura" readonly="readonly" size="4" value="0" />
+              <input id="droneauraup" onclick="addAura(2, 1, 1)" type="button" value=" + " />
+              <input id="droneauradown" onclick="addAura(2, -1, 1)" type="button" value=" - " />
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table class="tcenter">
+          <tr>
+            <td colspan="3"><input id="detailed" type="checkbox" value="detailed" onclick="updateShip()" />
+              Detailed Damage Analysis
+              <input id="port" type="checkbox" value="port" onclick="updateShip()" />
+              Port Damage Analysis </td>
+          </tr>
+          <tr>
+            <td>Upgrade list:</td>
+            <td>Ship Analysis:</td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><textarea id="list" rows="15" cols="40" style="font-family: courier new; font-size: 13px;"></textarea>
+            </td>
+            <td colspan="2"><textarea id="stats" rows="15" cols="50" style="font-family: courier new; font-size: 13px;"></textarea>
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table border="0" cellpadding="0" cellspacing="0" class="tcenter">
+          <tr>
+            <td class="white">Combat Options</td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr>
+          <tr>
+            <td><div style="text-align:right;">Your Level: </div></td>
+            <td><input id="plvl" onchange="updateShip()" value="1" size="5" />
+            </td>
+            <td><div style="text-align:right;">Enemy Level: </div></td>
+            <td><input id="elvl" onchange="updateShip()" value="1" size="5" />
+            </td>
+            <td><div style="text-align:right;">Enemy Damps:</div></td>
+            <td><input id="edamps" onchange="updateShip()" value="0" size="5" />
+            </td>
+          </tr>
+          <tr>
+            <td><div style="text-align:right;">Your Fire Mode:</div></td>
+            <td><select id="pfiremode" onchange="updateShip()">
+                <option value="0" selected="selected">1x Pris First</option>
+                <option value="1">1x Secs First</option>
+                <option value="2">2x Pris Only</option>
+                <option value="3">2x Secs Only</option>
+                <option value="4">3x No Guns</option>
+              </select>
+            </td>
+            <td><div style="text-align:right;">Enemy Race:</div></td>
+            <td><select id="erace" style="width: 100px" onchange="updateShip()">
+                <option value="0"></option>
+              </select>
+            </td>
+            <td><div style="text-align:right;">Enemy AI:</div></td>
+            <td><input id="eai" onchange="updateShip()" value="1" size="5" />
+            </td>
+          </tr>
+          <tr>
+            <td><div style="text-align:right;">Enemy Acc:</div></td>
+            <td><input id="eacc" onchange="updateShip()" value="110" size="5" />
+            </td>
+            <td><div style="text-align:right;">Enemy Man:</div></td>
+            <td><input id="eman" onchange="updateShip()" value="120" size="5" />
+            </td>
+            <td><div style="text-align:right;">Enemy Fire Mode:</div></td>
+            <td><select id="efiremode" onchange="updateShip()">
+                <option value="0" selected="selected">1x Pris First</option>
+                <option value="1">1x Secs First</option>
+                <option value="2">2x Pris Only</option>
+                <option value="3">2x Secs Only</option>
+                <option value="4">3x No Guns</option>
+              </select>
+            </td>
+          </tr>
+        </table>
+        <p></p>
+        <table width="600" class="tcenter">
+          <tr>
+            <td><table width="300" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td class="white">IRM Settings</td>
+                  <td>(LemmySim)</td>
+                </tr>
+                <tr>
+                  <td>Power to Shield %</td>
+                  <td><input id="powToShdPct" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Minimum Power %</td>
+                  <td><input id="minPowPct" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Minimum Shield %</td>
+                  <td><input id="minShdPct" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+              </table></td>
+            <td><table width="300" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td class="white">ARM Settings</td>
+                  <td>(LemmySim)</td>
+                </tr>
+                <tr>
+                  <td>After Combat:</td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Shield Drones:</td>
+                  <td><input id="armShield" type="text" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Combat Drones:</td>
+                  <td><input id="armCombat" type="text" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <!--
+				<tr>
+				  <td>Scout Drones:</td> 
+				  <td>
+				    <input id="armScout" type="text" size="5" value="0" onchange="updateShip()" />  
+				  </td>
+                </tr>
+					-->
+                <tr>
+                  <td>EMP Drones:</td>
+                  <td><input id="armEMP" type="text" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Repair Drones:</td>
+                  <td><input id="armRepair" type="text" size="5" value="0" onchange="updateShip()" />
+                  </td>
+                </tr>
+                <tr>
+                  <td>Remaining Drones:</td>
+                  <td><input id="armRemaining" size="5" value="0" readonly="readonly" />
+                    <select id="armRemainingType" onchange="updateShip()">
+                      <option value="0" selected="selected">Shield</option>
+                      <option value="1">Combat</option>
+                      <option value="2">EMP</option>
+                      <option value="3">Repair</option>
+                      <option value="4">Scout</option>
+                    </select>
+                  </td>
+                </tr>
+              </table></td>
+          </tr>
+        </table></td>
+    </tr>
+  </table>
+  <script type="text/JavaScript" src="http://www.redial.net/calc2.8/tdzkbuildcalc2.8.js"></script>
+  <script type="text/JavaScript">
+		//This script reads out a shipstring from the URL, or loads up the lastship cookie
+		var data = document.location.search.substring(1); // trims "?" from beginning:
+		if(data.length > 0){
+			//split out the shipstring from the querystring and assign to var s
+			data = data.split("=");
+			var s = data[1].split("+").join(" ");
+			
+			e=document.forms["form"].elements;
+			explodeshipstring(s, 0);
+		}
+		else
+		{
+			e=document.forms["form"].elements;
+			loadship(parseInt(getCookie("2.8lastship")));
+			updateShip();
+			selectEq();
+		}
+	</script>
+</form>
